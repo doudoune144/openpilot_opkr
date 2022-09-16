@@ -1,4 +1,6 @@
-# Welcome to OPKR
+# DO NOT USE THIS FORK
+This is a fork of the OPRK openpilot repo. Changes made here may be unsafe to use.
+
 
 Table of Contents
 ==================
