@@ -231,6 +231,9 @@ def manager_init() -> None:
     ("LanguageSetting", "main_en"),
     ("OPKRSpeedBump", "0"),
     ("OPKREarlyStop", "1"),
+    ("DoNotDisturbMode", "0"),
+    ("DepartChimeAtResume", "0"),
+    ("CommaStockUI", "0"),
    ]
   if not PC:
     default_params.append(("LastUpdateTime", datetime.datetime.utcnow().isoformat().encode('utf8')))
