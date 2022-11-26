@@ -1091,7 +1091,7 @@ class CarController():
               stock_weight = 1.0
               accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
             else:
-              stock_weight = 0.0
+              stock_weight = 1.0
               self.change_accel_fast = False
               accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
           elif 0.1 < self.dRel < 6.0 and int(self.vRel*3.6) < 0:
