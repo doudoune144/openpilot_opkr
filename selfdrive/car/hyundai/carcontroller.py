@@ -1011,7 +1011,7 @@ class CarController():
         elif self.radar_helper_option == 2:
           accel = aReqValue
         elif self.radar_helper_option == 3:
-          if 0 < CS.lead_distance <= 149:
+          if 0 < CS.lead_distance <= 100:
             stock_weight = 0.0
             self.smooth_start = False
             self.vrel_delta_timer2 += 1
