@@ -47,6 +47,13 @@ def navid_thread(end_event, nv_queue):
       sign_type = 0
       turn_info = 0
       turn_distance = 0
+      road_limit_speed = 0
+      link_length = 0
+      current_link_angle = 0
+      next_link_angle = 0
+      pos_road_name = ""
+      is_highway = 0
+      is_tunnel = 0
 
       context = zmq.Context()
       socket = context.socket(zmq.SUB)
@@ -83,6 +90,27 @@ def navid_thread(end_event, nv_queue):
         if "opkrdistancetoturn" in line:
           arr = line.split('opkrdistancetoturn: ')
           turn_distance = arr[1]
+        if "opkrroadlimitspd" in line:
+          arr = line.split('opkrroadlimitspd: ')
+          road_limit_speed = arr[1]
+        if "opkrlinklength" in line:
+          arr = line.split('opkrlinklength: ')
+          link_length = arr[1]
+        if "opkrcurrentlinkangle" in line:
+          arr = line.split('opkrcurrentlinkangle: ')
+          current_link_angle = arr[1]
+        if "opkrnextlinkangle" in line:
+          arr = line.split('opkrnextlinkangle: ')
+          next_link_angle = arr[1]
+        if "opkrposroadname" in line:
+          arr = line.split('opkrposroadname: ')
+          pos_road_name = arr[1]
+        if "opkrishighway" in line:
+          arr = line.split('opkrishighway: ')
+          is_highway = arr[1]
+        if "opkristunnel" in line:
+          arr = line.split('opkristunnel: ')
+          is_tunnel = arr[1]
 
       navi_msg = messaging.new_message('liveENaviData')
       navi_msg.liveENaviData.speedLimit = int(spd_limit)
@@ -91,6 +119,13 @@ def navid_thread(end_event, nv_queue):
       navi_msg.liveENaviData.turnInfo = int(turn_info)
       navi_msg.liveENaviData.distanceToTurn = float(turn_distance)
       navi_msg.liveENaviData.connectionAlive = bool(check_connection)
+      navi_msg.liveENaviData.roadLimitSpeed = int(road_limit_speed)
+      navi_msg.liveENaviData.linkLength = int(link_length)
+      navi_msg.liveENaviData.currentLinkAngle = int(current_link_angle)
+      navi_msg.liveENaviData.nextLinkAngle = int(next_link_angle)
+      navi_msg.liveENaviData.posRoadName = str(pos_road_name)
+      navi_msg.liveENaviData.isHighway = bool(int(is_highway))
+      navi_msg.liveENaviData.isTunnel = bool(int(is_tunnel))
       pm.send('liveENaviData', navi_msg)
 
     count += 1
