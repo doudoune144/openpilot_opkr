@@ -1013,7 +1013,7 @@ class CarController():
         elif self.radar_helper_option == 1: # Radar Only
           accel = aReqValue
         elif self.radar_helper_option >= 2: # OPKR Custom(Radar+Vision), more smooth slowdown for cut-in or encountering being decellerated car.
-          if 0 < CS.lead_distance <= 149:
+          if 0 < CS.lead_distance <= 80:
             stock_weight = 0.0
             self.smooth_start = False
             self.vrel_delta_timer2 += 1
@@ -1041,7 +1041,7 @@ class CarController():
                 if aReqValue < accel:
                   accel = interp(lead_objspd, [-1, 0, 5], [aReqValue, aReqValue, accel])
                 else:
-                  accel = accel*0.8
+                  accel = accel
               else:
                 accel = aReqValue
             elif aReqValue < 0.0 and CS.lead_distance < self.stoppingdist and accel >= aReqValue and lead_objspd <= 0 and self.stopping_dist_adj_enabled:
@@ -1095,7 +1095,7 @@ class CarController():
             #   stock_weight = interp(CS.lead_distance, [6.0, 10.0, 18.0, 25.0, 32.0], [1.0, 0.85, 1.0, 0.4, 1.0])
             #   accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
             else:
-              stock_weight = 0.0
+              stock_weight = 1.0
               self.change_accel_fast = False
               accel = accel * (1.0 - stock_weight) + aReqValue * stock_weight
           elif 0.1 < self.dRel < 6.0 and int(self.vRel*3.6) < 0:
