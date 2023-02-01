@@ -258,6 +258,7 @@ typedef struct UIScene {
   int do_not_disturb_mode;
   bool depart_chime_at_resume;
   int comma_stock_ui;
+  bool OPKR_Debug;
 
   cereal::DeviceState::Reader deviceState;
   cereal::CarState::Reader car_state;
@@ -326,6 +327,23 @@ typedef struct UIScene {
     float opkrcurveangle;
     int   opkrturninfo;
     float opkrdisttoturn;
+    std::string opkr0;
+    std::string opkr1;
+    std::string opkr2;
+    std::string opkr3;
+    std::string opkr4;
+    std::string opkr5;
+    std::string opkr6;
+    std::string opkr7;
+    std::string opkr8;
+    std::string opkr9;
+    int wazealertid;
+    int wazealertdistance;
+    int wazeroadspeedlimit;
+    int wazecurrentspeed;
+    std::string wazeroadname;
+    int wazenavsign;
+    int wazenavdistance;
   } liveNaviData;
 
   struct _LiveENaviData
@@ -343,6 +361,23 @@ typedef struct UIScene {
     std::string eopkrposroadname;
     bool eopkrishighway;
     bool eopkristunnel;
+    std::string eopkr0;
+    std::string eopkr1;
+    std::string eopkr2;
+    std::string eopkr3;
+    std::string eopkr4;
+    std::string eopkr5;
+    std::string eopkr6;
+    std::string eopkr7;
+    std::string eopkr8;
+    std::string eopkr9;
+    int ewazealertid;
+    int ewazealertdistance;
+    int ewazeroadspeedlimit;
+    int ewazecurrentspeed;
+    std::string ewazeroadname;
+    int ewazenavsign;
+    int ewazenavdistance;
   } liveENaviData;
 
   struct _LiveMapData

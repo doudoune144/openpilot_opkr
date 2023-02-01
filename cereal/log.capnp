@@ -1755,6 +1755,25 @@ struct LiveNaviData {
 
   mapValid @8 :Bool;
   mapEnable @9 :Int32;
+
+  opkr0 @10 :Text;
+  opkr1 @11 :Text;
+  opkr2 @12 :Text;
+  opkr3 @13 :Text;
+  opkr4 @14 :Text;
+  opkr5 @15 :Text;
+  opkr6 @16 :Text;
+  opkr7 @17 :Text;
+  opkr8 @18 :Text;
+  opkr9 @19 :Text;
+
+  wazeAlertId @20 :Int8;
+  wazeAlertDistance @21 :Int32;
+  wazeRoadSpeedLimit @22 :Int32;
+  wazeRoadName @23 :Text;
+  wazeNavSign @24 :Int64;
+  wazeNavDistance @25 :Int32;
+  wazeCurrentSpeed @26 :Int32;
 }
 
 struct LiveENaviData {
@@ -1772,6 +1791,23 @@ struct LiveENaviData {
   posRoadName @11 :Text;
   isHighway @12 :Bool;
   isTunnel @13 :Bool;
+  opkr0 @14 :Text;
+  opkr1 @15 :Text;
+  opkr2 @16 :Text;
+  opkr3 @17 :Text;
+  opkr4 @18 :Text;
+  opkr5 @19 :Text;
+  opkr6 @20 :Text;
+  opkr7 @21 :Text;
+  opkr8 @22 :Text;
+  opkr9 @23 :Text;
+  wazeAlertId @24 :Int8;
+  wazeAlertDistance @25 :Int32;
+  wazeRoadSpeedLimit @26 :Int32;
+  wazeRoadName @27 :Text;
+  wazeNavSign @28 :Int64;
+  wazeNavDistance @29 :Int32;
+  wazeCurrentSpeed @30 :Int32;
 }
 
 struct LiveMapDataDEPRECATED {

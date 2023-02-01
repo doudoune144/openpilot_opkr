@@ -365,6 +365,27 @@ static void update_state(UIState *s) {
     scene.liveNaviData.opkrcurveangle = lm_data.getRoadCurvature();
     scene.liveNaviData.opkrturninfo = lm_data.getTurnInfo();
     scene.liveNaviData.opkrdisttoturn = lm_data.getDistanceToTurn();
+    if (scene.OPKR_Debug) {
+      scene.liveNaviData.opkr0 = lm_data.getOpkr0();
+      scene.liveNaviData.opkr1 = lm_data.getOpkr1();
+      scene.liveNaviData.opkr2 = lm_data.getOpkr2();
+      scene.liveNaviData.opkr3 = lm_data.getOpkr3();
+      scene.liveNaviData.opkr4 = lm_data.getOpkr4();
+      scene.liveNaviData.opkr5 = lm_data.getOpkr5();
+      scene.liveNaviData.opkr6 = lm_data.getOpkr6();
+      scene.liveNaviData.opkr7 = lm_data.getOpkr7();
+      scene.liveNaviData.opkr8 = lm_data.getOpkr8();
+      scene.liveNaviData.opkr9 = lm_data.getOpkr9();
+    }
+    if (scene.navi_select == 3) {
+      scene.liveNaviData.wazealertid = lm_data.getWazeAlertId();
+      scene.liveNaviData.wazealertdistance = lm_data.getWazeAlertDistance();
+      scene.liveNaviData.wazeroadspeedlimit = lm_data.getWazeRoadSpeedLimit();
+      scene.liveNaviData.wazecurrentspeed = lm_data.getWazeCurrentSpeed();
+      scene.liveNaviData.wazeroadname = lm_data.getWazeRoadName();
+      scene.liveNaviData.wazenavsign = lm_data.getWazeNavSign();
+      scene.liveNaviData.wazenavdistance = lm_data.getWazeNavDistance();
+    }
   }
   if (sm.updated("liveENaviData")) {
     scene.live_enavi_data = sm["liveENaviData"].getLiveENaviData();
@@ -382,6 +403,27 @@ static void update_state(UIState *s) {
     scene.liveENaviData.eopkrposroadname = lme_data.getPosRoadName();
     scene.liveENaviData.eopkrishighway = lme_data.getIsHighway();
     scene.liveENaviData.eopkristunnel = lme_data.getIsTunnel();
+    if (scene.OPKR_Debug) {
+      scene.liveENaviData.eopkr0 = lme_data.getOpkr0();
+      scene.liveENaviData.eopkr1 = lme_data.getOpkr1();
+      scene.liveENaviData.eopkr2 = lme_data.getOpkr2();
+      scene.liveENaviData.eopkr3 = lme_data.getOpkr3();
+      scene.liveENaviData.eopkr4 = lme_data.getOpkr4();
+      scene.liveENaviData.eopkr5 = lme_data.getOpkr5();
+      scene.liveENaviData.eopkr6 = lme_data.getOpkr6();
+      scene.liveENaviData.eopkr7 = lme_data.getOpkr7();
+      scene.liveENaviData.eopkr8 = lme_data.getOpkr8();
+      scene.liveENaviData.eopkr9 = lme_data.getOpkr9();
+    }
+    if (scene.navi_select == 5) {
+      scene.liveENaviData.ewazealertid = lme_data.getWazeAlertId();
+      scene.liveENaviData.ewazealertdistance = lme_data.getWazeAlertDistance();
+      scene.liveENaviData.ewazeroadspeedlimit = lme_data.getWazeRoadSpeedLimit();
+      scene.liveENaviData.ewazecurrentspeed = lme_data.getWazeCurrentSpeed();
+      scene.liveENaviData.ewazeroadname = lme_data.getWazeRoadName();
+      scene.liveENaviData.ewazenavsign = lme_data.getWazeNavSign();
+      scene.liveENaviData.ewazenavdistance = lme_data.getWazeNavDistance();
+    }
   }
   if (sm.updated("liveMapData")) {
     scene.live_map_data = sm["liveMapData"].getLiveMapData();
@@ -489,14 +531,13 @@ static void update_status(UIState *s) {
       s->scene.map_on_top = true;
       s->scene.map_on_overlay = false;
       params.putBool("OpkrMapEnable", true);
-      if (s->scene.navi_select == 0) {
-        system("am start com.thinkware.inaviair/com.thinkware.inaviair.UIActivity");
-      } else if (s->scene.navi_select == 1) {
+      if (s->scene.navi_select == 1) {
         system("am start com.mnsoft.mappyobn/com.mnsoft.mappy.MainActivity");
       } else if (s->scene.navi_select == 2) {
+        system("am start com.thinkware.inaviair/com.thinkware.inaviair.UIActivity");
+      } else if (s->scene.navi_select == 3) {
         system("am start com.waze/com.waze.MainActivity");
       }
-
     } else if (s->sm->frame - s->scene.started_frame > 20*UI_FREQ) {
       s->scene.navi_on_boot = true;
     }
@@ -570,6 +611,7 @@ static void update_status(UIState *s) {
     s->scene.lateralControlMethod = std::stoi(params.get("LateralControlMethod"));
     s->scene.do_not_disturb_mode = std::stoi(params.get("DoNotDisturbMode"));
     s->scene.depart_chime_at_resume = params.getBool("DepartChimeAtResume");
+    s->scene.OPKR_Debug = params.getBool("OPKRDebug");
 
     if (s->scene.autoScreenOff > 0) {
       s->scene.nTime = s->scene.autoScreenOff * 60 * UI_FREQ;
