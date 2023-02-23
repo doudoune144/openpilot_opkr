@@ -1010,12 +1010,12 @@ class CarController():
           else:
             self.stopped = False
             accel = aReqValue
-        elif self.radar_helper_option == 1: # Radar Only
+        elif self.radar_helper_option == 1 and CS.out.vEgo > 25: # Radar Only on HWY
           if aReqValue > 0:
             accel = max(aReqValue,accel)
           else:
             accel = aReqValue
-        elif self.radar_helper_option >= 2: # OPKR Custom(Radar+Vision), more smooth slowdown for cut-in or encountering being decellerated car.
+        elif self.radar_helper_option >= 1: # OPKR Custom(Radar+Vision), more smooth slowdown for cut-in or encountering being decellerated car.
           if 0 < CS.lead_distance <= 80:
             stock_weight = 0.0
             self.smooth_start = False
