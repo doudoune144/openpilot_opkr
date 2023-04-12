@@ -202,7 +202,7 @@ static void update_state(UIState *s) {
     scene.steerRatio = scene.controls_state.getSteerRatio();
     scene.dynamic_tr_mode = scene.controls_state.getDynamicTRMode();
     scene.dynamic_tr_value = scene.controls_state.getDynamicTRValue();
-    scene.osm_off_spdlimit = scene.controls_state.getOsmOffSpdLimit();
+    scene.pause_spdlimit = scene.controls_state.getPauseSpdLimit();
     scene.accel = scene.controls_state.getAccel();
     scene.ctrl_speed = scene.controls_state.getSafetySpeed();
     scene.desired_angle_steers = scene.controls_state.getSteeringAngleDesiredDeg();
@@ -234,6 +234,7 @@ static void update_state(UIState *s) {
     scene.standStill = cs_data.getStandStill();
     scene.vSetDis = cs_data.getVSetDis();
     scene.cruiseAccStatus = cs_data.getCruiseAccStatus();
+    scene.driverAcc = cs_data.getDriverAcc();
     scene.angleSteers = cs_data.getSteeringAngleDeg();
     scene.cruise_gap = cs_data.getCruiseGapSet();
     scene.brakeHold = cs_data.getBrakeHold();
@@ -385,6 +386,7 @@ static void update_state(UIState *s) {
       scene.liveNaviData.wazeroadname = lm_data.getWazeRoadName();
       scene.liveNaviData.wazenavsign = lm_data.getWazeNavSign();
       scene.liveNaviData.wazenavdistance = lm_data.getWazeNavDistance();
+      scene.liveNaviData.wazealerttype = lm_data.getWazeAlertType();
     }
   }
   if (sm.updated("liveENaviData")) {
@@ -400,7 +402,7 @@ static void update_state(UIState *s) {
     scene.liveENaviData.eopkrlinklength = lme_data.getLinkLength();
     scene.liveENaviData.eopkrcurrentlinkangle = lme_data.getCurrentLinkAngle();
     scene.liveENaviData.eopkrnextlinkangle = lme_data.getNextLinkAngle();
-    scene.liveENaviData.eopkrposroadname = lme_data.getPosRoadName();
+    scene.liveENaviData.eopkrroadname = lme_data.getRoadName();
     scene.liveENaviData.eopkrishighway = lme_data.getIsHighway();
     scene.liveENaviData.eopkristunnel = lme_data.getIsTunnel();
     if (scene.OPKR_Debug) {
@@ -423,6 +425,7 @@ static void update_state(UIState *s) {
       scene.liveENaviData.ewazeroadname = lme_data.getWazeRoadName();
       scene.liveENaviData.ewazenavsign = lme_data.getWazeNavSign();
       scene.liveENaviData.ewazenavdistance = lme_data.getWazeNavDistance();
+      scene.liveENaviData.ewazealerttype = lme_data.getWazeAlertType();
     }
   }
   if (sm.updated("liveMapData")) {
@@ -552,6 +555,34 @@ static void update_status(UIState *s) {
       s->scene.move_to_background = true;
     }
   }
+
+  // waze refresh at vehicle stop to prevent app from entering into pause state, refresh time 2min
+  if (s->scene.navi_select == 3 && s->scene.map_is_running && s->scene.map_on_overlay) {
+    if (s->scene.liveNaviData.wazecurrentspeed == 0 && !s->scene.waze_stop) {
+      s->scene.waze_stop_frame = s->sm->frame;
+      s->scene.waze_stop = true;
+    } else if (s->scene.waze_stop && (s->sm->frame - s->scene.waze_stop_frame > 120*UI_FREQ)) {
+      if (s->scene.liveNaviData.wazecurrentspeed == 0) {
+        s->scene.map_on_top = true;
+        s->scene.map_on_overlay = false;
+        s->scene.waze_stop_frame = s->sm->frame;
+        system("am start --activity-task-on-home com.waze/com.waze.MainActivity");
+      } else if (s->scene.liveNaviData.wazecurrentspeed > 0) {
+        s->scene.waze_stop = false;
+      }
+    } else if (s->scene.liveNaviData.wazecurrentspeed > 0 && s->scene.waze_stop) {
+      s->scene.waze_stop = false;
+    }
+  } else if (s->scene.navi_select == 3 && s->scene.map_is_running && !s->scene.map_on_overlay && s->scene.waze_stop) {
+    if (s->sm->frame - s->scene.waze_stop_frame > 20*UI_FREQ) {
+      s->scene.waze_stop = false;
+      s->scene.map_on_top = false;
+      s->scene.map_on_overlay = true;
+      system("am start --activity-task-on-home com.opkr.maphack/com.opkr.maphack.MainActivity");
+    }
+  }
+
+  // this is useful to save compiling time before depart when you use remote ignition
   if (!s->scene.auto_gitpull && (s->sm->frame - s->scene.started_frame > 15*UI_FREQ)) {
     if (params.getBool("GitPullOnBoot")) {
       s->scene.auto_gitpull = true;

@@ -381,16 +381,16 @@ static void ui_draw_debug(UIState *s) {
           if (scene.liveENaviData.eopkrishighway || scene.liveENaviData.eopkristunnel) ui_print(s, ui_viz_rx, ui_viz_ry+720, "H:%d/T:%d", scene.liveENaviData.eopkrishighway, scene.liveENaviData.eopkristunnel);
           //if (scene.liveENaviData.eopkrlinklength || scene.liveENaviData.eopkrcurrentlinkangle || scene.liveENaviData.eopkrnextlinkangle) ui_print(s, ui_viz_rx, ui_viz_ry+840, "L:%d/C:%d/N:%d", scene.liveENaviData.eopkrlinklength, scene.liveENaviData.eopkrcurrentlinkangle, scene.liveENaviData.eopkrnextlinkangle);
         } else if (scene.navi_select == 3) {
-          if (scene.liveNaviData.wazecurrentspeed) ui_print(s, ui_viz_rx, ui_viz_ry+560, "CS:%d", scene.liveNaviData.wazecurrentspeed);
-          if (scene.liveNaviData.wazealertid || scene.liveNaviData.wazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+600, "AS:%d/DS:%d", scene.liveNaviData.wazealertid, scene.liveNaviData.wazealertdistance);
-          if (scene.liveNaviData.wazeroadspeedlimit) ui_print(s, ui_viz_rx, ui_viz_ry+640, "RS:%d", scene.liveNaviData.wazeroadspeedlimit);
+          if (scene.liveNaviData.wazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+560, "AS:%d/DS:%d", scene.liveNaviData.wazealertid, scene.liveNaviData.wazealertdistance);
+          if (scene.liveNaviData.wazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+600, "T:%s", scene.liveNaviData.wazealerttype.c_str());
+          if (scene.liveNaviData.wazecurrentspeed || scene.liveNaviData.wazeroadspeedlimit) ui_print(s, ui_viz_rx, ui_viz_ry+640, "CS:%d/RS:%d", scene.liveNaviData.wazecurrentspeed, scene.liveNaviData.wazeroadspeedlimit);
           if (scene.liveNaviData.wazenavdistance) ui_print(s, ui_viz_rx, ui_viz_ry+680, "RN:%s", scene.liveNaviData.wazeroadname.c_str());
           if (scene.liveNaviData.wazenavsign) ui_print(s, ui_viz_rx, ui_viz_ry+720, "NS:%d", scene.liveNaviData.wazenavsign);
           if (scene.liveNaviData.wazenavdistance) ui_print(s, ui_viz_rx, ui_viz_ry+760, "ND:%d", scene.liveNaviData.wazenavdistance);
         } else if (scene.navi_select == 5) {
-          if (scene.liveENaviData.ewazecurrentspeed) ui_print(s, ui_viz_rx, ui_viz_ry+560, "CS:%d", scene.liveENaviData.ewazecurrentspeed);
-          if (scene.liveENaviData.ewazealertid || scene.liveENaviData.ewazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+600, "AS:%d/DS:%d", scene.liveENaviData.ewazealertid, scene.liveENaviData.ewazealertdistance);
-          if (scene.liveENaviData.ewazeroadspeedlimit) ui_print(s, ui_viz_rx, ui_viz_ry+640, "RS:%d", scene.liveENaviData.ewazeroadspeedlimit);
+          if (scene.liveENaviData.ewazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+560, "AS:%d/DS:%d", scene.liveENaviData.ewazealertid, scene.liveENaviData.ewazealertdistance);
+          if (scene.liveENaviData.ewazealertdistance) ui_print(s, ui_viz_rx, ui_viz_ry+600, "T:%s", scene.liveENaviData.ewazealerttype.c_str());
+          if (scene.liveENaviData.ewazecurrentspeed || scene.liveENaviData.ewazeroadspeedlimit) ui_print(s, ui_viz_rx, ui_viz_ry+640, "CS:%d/RS:%d", scene.liveENaviData.ewazecurrentspeed, scene.liveENaviData.ewazeroadspeedlimit);
           if (scene.liveENaviData.ewazenavdistance) ui_print(s, ui_viz_rx, ui_viz_ry+680, "RN:%s", scene.liveENaviData.ewazeroadname.c_str());
           if (scene.liveENaviData.ewazenavsign) ui_print(s, ui_viz_rx, ui_viz_ry+720, "NS:%d", scene.liveENaviData.ewazenavsign);
           if (scene.liveENaviData.ewazenavdistance) ui_print(s, ui_viz_rx, ui_viz_ry+760, "ND:%d", scene.liveENaviData.ewazenavdistance);
@@ -599,6 +599,7 @@ static void ui_draw_vision_maxspeed(UIState *s) {
 static void ui_draw_vision_cruise_speed(UIState *s) {
   const int SET_SPEED_NA = 255;
   float maxspeed = round(s->scene.controls_state.getVCruise());
+  float ctrlspeed = round(s->scene.controls_state.getSafetySpeed());  
   const bool is_cruise_set = maxspeed != 0 && maxspeed != SET_SPEED_NA;
   int limitspeedcamera = s->scene.limitSpeedCamera;
   //if (is_cruise_set && !s->scene.is_metric) { maxspeed *= 0.6225; }
@@ -639,23 +640,43 @@ static void ui_draw_vision_cruise_speed(UIState *s) {
   ui_draw_rect(s->vg, rect, COLOR_WHITE_ALPHA(100), 10, 20.);
 
   nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_BASELINE);
-  if (limitspeedcamera > 21 && limitspeedcamera <= round(maxspeed)) {
-    ui_draw_text(s, rect.centerX(), bdr_s+65, "LIMIT", 26 * 2.5, COLOR_WHITE_ALPHA(s->scene.cruiseAccStatus ? 200 : 100), "sans-regular");
+  if (limitspeedcamera > 21) {
+    const std::string ctrlspeed_str = std::to_string((int)std::nearbyint(ctrlspeed));
+    if (ctrlspeed == 0) {
+      ui_draw_text(s, rect.centerX(), bdr_s+65, "-", 26 * 3.3, COLOR_WHITE, "sans-bold");
+    } else if (is_cruise_set && !s->scene.cruiseAccStatus) {
+      const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
+      ui_draw_text(s, rect.centerX(), bdr_s+65, maxspeed_str.c_str(), 26 * 3.3, COLOR_WHITE, "sans-bold");
+    } else {
+      ui_draw_text(s, rect.centerX(), bdr_s+65, ctrlspeed_str.c_str(), 26 * 3.3, COLOR_WHITE, "sans-bold");
+    }
   } else if (is_cruise_set) {
     const std::string maxspeed_str = std::to_string((int)std::nearbyint(maxspeed));
-    ui_draw_text(s, rect.centerX(), bdr_s+65, maxspeed_str.c_str(), 26 * 3.3, COLOR_WHITE, "sans-bold");
+    if (maxspeed == 0) {
+      ui_draw_text(s, rect.centerX(), bdr_s+65, "-", 26 * 3.3, COLOR_WHITE, "sans-bold");
+    } else {
+      ui_draw_text(s, rect.centerX(), bdr_s+65, maxspeed_str.c_str(), 26 * 3.3, COLOR_WHITE, "sans-bold");
+    }
   } else {
     ui_draw_text(s, rect.centerX(), bdr_s+65, "-", 26 * 3.3, COLOR_WHITE_ALPHA(100), "sans-semibold");
   }
 
   const std::string cruise_speed_str = std::to_string((int)std::nearbyint(cruise_speed));
-  if (s->scene.controls_state.getEnabled() && !s->scene.cruiseAccStatus && limitspeedcamera > 21) {
-    const std::string limitspeedcamera_str = std::to_string((int)std::nearbyint(s->scene.ctrl_speed));
-    ui_draw_text(s, rect.centerX(), bdr_s+165, limitspeedcamera_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
+  if (s->scene.controls_state.getEnabled() && !s->scene.cruiseAccStatus && !s->scene.driverAcc && limitspeedcamera > 21) {
+    const std::string limitspeedcamera_str = std::to_string((int)std::nearbyint(ctrlspeed));
+    if (ctrlspeed == 0) {
+      ui_draw_text(s, rect.centerX(), bdr_s+165, "-", 48 * 2.5, COLOR_WHITE, "sans-bold");
+    } else {
+      ui_draw_text(s, rect.centerX(), bdr_s+165, limitspeedcamera_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
+    }
   } else if (cruise_speed >= 20 && s->scene.controls_state.getEnabled()) {
-    ui_draw_text(s, rect.centerX(), bdr_s+165, cruise_speed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
+    if (cruise_speed == 0) {
+      ui_draw_text(s, rect.centerX(), bdr_s+165, "-", 48 * 2.5, COLOR_WHITE, "sans-bold");
+    } else {
+      ui_draw_text(s, rect.centerX(), bdr_s+165, cruise_speed_str.c_str(), 48 * 2.5, COLOR_WHITE, "sans-bold");
+    }
   } else {
-    ui_draw_text(s, rect.centerX(), bdr_s+165, "-", 42 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
+    ui_draw_text(s, rect.centerX(), bdr_s+165, "-", 48 * 2.5, COLOR_WHITE_ALPHA(100), "sans-semibold");
   }
 }
 
@@ -1362,7 +1383,7 @@ static void draw_safetysign(UIState *s) {
   int sl_opacity = 0;
   if (s->scene.sl_decel_off) {
     sl_opacity = 3;
-  } else if (s->scene.osm_off_spdlimit) {
+  } else if (s->scene.pause_spdlimit) {
     sl_opacity = 2;
   } else {
     sl_opacity = 1;
@@ -1421,6 +1442,14 @@ static void draw_safetysign(UIState *s) {
       nvgTextAlign(s->vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
       ui_draw_text(s, rect_d.centerX(), rect_d.centerY(), safetyDist, 78, COLOR_WHITE_ALPHA(200/sl_opacity), "sans-bold");
     }
+
+    // waze safety type img
+    if (s->scene.liveNaviData.wazealertid == 1) {
+      ui_draw_image(s, {s_center_x - diameter3/2 + 212, s_center_y - diameter3/2, diameter3, diameter3}, "speed_cam", 1.0f);
+    } else if (s->scene.liveNaviData.wazealertid == 2) {
+      ui_draw_image(s, {s_center_x - diameter3/2 + 212, s_center_y - diameter3/2, diameter3, diameter3}, "police_car", 1.0f);
+    }
+
   } else if ((s->scene.mapSignCam == 195 || s->scene.mapSignCam == 197) && safety_speed == 0 && safety_dist != 0 && s->scene.navi_select == 1) {
     ui_fill_rect(s->vg, rect_si, COLOR_WHITE_ALPHA(200/sl_opacity), diameter2/2);
     ui_draw_rect(s->vg, rect_s, COLOR_RED_ALPHA(200/sl_opacity), 20, diameter/2);
@@ -1682,7 +1711,7 @@ static void ui_draw_blindspot_mon(UIState *s) {
 }
 
 // draw date/time/streetname
-void draw_datetime_osm_info_text(UIState *s) {
+void draw_datetime_streetname_text(UIState *s, const std::string string1, const std::string string2) {
   int rect_w = 600;
   int rect_x = s->fb_w/2 - rect_w/2;
   const int rect_h = 60;
@@ -1709,8 +1738,8 @@ void draw_datetime_osm_info_text(UIState *s) {
     strcpy(dayofweek, "SAT");
   }
 
-  const std::string road_name = s->scene.liveNaviData.wazeroadname;
-  const std::string ref_ = s->scene.liveMapData.oref;
+  const std::string road_name = string1;
+  const std::string oref = string2;
   std::string text_out = "";
   if (s->scene.top_text_view == 1) {
     snprintf(now,sizeof(now),"%02d-%02d %s %02d:%02d:%02d", tm.tm_mon + 1, tm.tm_mday, dayofweek, tm.tm_hour, tm.tm_min, tm.tm_sec);
@@ -1727,17 +1756,17 @@ void draw_datetime_osm_info_text(UIState *s) {
   } else if (s->scene.top_text_view == 4) {
     snprintf(now,sizeof(now),"%02d-%02d %s %02d:%02d:%02d ", tm.tm_mon + 1, tm.tm_mday, dayofweek, tm.tm_hour, tm.tm_min, tm.tm_sec);
     std::string str(now);
-    text_out = str + road_name + ref_;
+    text_out = str + road_name + oref;
   } else if (s->scene.top_text_view == 5) {
     snprintf(now,sizeof(now),"%02d-%02d %s ", tm.tm_mon + 1, tm.tm_mday, dayofweek);
     std::string str(now);
-    text_out = str + road_name + ref_;
+    text_out = str + road_name + oref;
   } else if (s->scene.top_text_view == 6) {
     snprintf(now,sizeof(now),"%02d:%02d:%02d ", tm.tm_hour, tm.tm_min, tm.tm_sec);
     std::string str(now);
-    text_out = str + road_name + ref_;
+    text_out = str + road_name + oref;
   } else if (s->scene.top_text_view == 7) {
-    text_out = road_name;
+    text_out = road_name + oref;
   }
   float tw = nvgTextBounds(s->vg, 0, 0, text_out.c_str(), nullptr, nullptr);
   rect_w = tw*2;
@@ -2036,9 +2065,21 @@ static void ui_draw_vision(UIState *s) {
   if (scene->live_tune_panel_enable) {
     ui_draw_live_tune_panel(s);
   }
+
   if (scene->top_text_view > 0 && scene->comma_stock_ui != 1) {
-    draw_datetime_osm_info_text(s);
+    if (scene->navi_select == 4 && scene->liveMapData.ocurrentRoadName == "") {
+      draw_datetime_streetname_text(s, scene->liveENaviData.eopkrroadname, "");
+    } else if (scene->navi_select == 3) {
+      draw_datetime_streetname_text(s, scene->liveNaviData.wazeroadname, "");
+    } else if (scene->navi_select == 5) {
+      draw_datetime_streetname_text(s, scene->liveENaviData.ewazeroadname, "");
+    } else if (scene->osm_enabled) {
+      draw_datetime_streetname_text(s, scene->liveMapData.ocurrentRoadName, scene->liveMapData.oref);
+    } else {
+      draw_datetime_streetname_text(s, "", "");
+    }
   }
+
   if (scene->brakeHold && scene->comma_stock_ui != 1) {
     ui_draw_auto_hold(s);
   }
@@ -2121,6 +2162,30 @@ void ui_nvg_init(UIState *s) {
     {"wheel", "../assets/img_chffr_wheel.png"},
     {"driver_face", "../assets/img_driver_face.png"},
     {"speed_bump", "../assets/addon/img/img_speed_bump.png"},
+    {"speed_cam", "../assets/addon/img/img_speed_cam.png"},
+    {"police_car", "../assets/addon/img/img_police_car.png"},
+    /*
+    {"nav_direction_end", "../assets/navigation/direction_arrive.png"}, // 7f080116 2131230998
+    {"nav_direction_exit_left", "../assets/navigation/direction_off_ramp_slight_left.png"}, // 7f080117 2131230999 
+    {"nav_direction_exit_right", "../assets/navigation/direction_off_ramp_slight_right.png"}, // 7f080118 2131231000 
+    {"nav_direction_forward", "../assets/navigation/direction_turn_straight.png"}, // 7f080119 2131231001 
+    //{"nav_direction_hov", "../assets/navigation/ 7f08011a 2131231002
+    {"nav_direction_left", "../assets/navigation/direction_turn_left.png"}, // 7f08011b 2131231003 
+    {"nav_direction_right", "../assets/navigation/direction_turn_right.png"}, // 7f08011c 2131231004 
+    //{"nav_direction_stop", "../assets/navigation/ 7f08011d 2131231005
+    {"nav_directions_roundabout", "../assets/navigation/direction_roundabout.png"}, // 7f08011e 2131231006 
+    {"nav_directions_roundabout_l", "../assets/navigation/direction_roundabout_left.png"}, // 7f08011f 2131231007 
+    {"nav_directions_roundabout_r", "../assets/navigation/direction_roundabout_right.png"}, // 7f080120 2131231008 
+    //{"nav_directions_roundabout_r_uk", "../assets/navigation/ 7f080121 2131231009
+    {"nav_directions_roundabout_s", "../assets/navigation/direction_roundabout_straight.png"}, // 7f080122 2131231010 
+    //{"nav_directions_roundabout_u", "../assets/navigation/ 7f080123 2131231011
+    //{"nav_directions_roundabout_u_uk", "../assets/navigation/ 7f080124 2131231012
+    //{"nav_directions_roundabout_uk", "../assets/navigation/ 7f080125 2131231013
+    //{"nav_directions_roundabout_uk_l", "../assets/navigation/ 7f080126 2131231014
+    //{"nav_directions_roundabout_uk_s", "../assets/navigation/ 7f080127 2131231015
+    {"nav_directions_uturn", "../assets/navigation/direction_turn_uturn.png"}, // 7f080128 2131231016 
+    //{"nav_directions_uturn_uk", "../assets/navigation/ 7f080129 2131231017
+    */
   };
   for (auto [name, file] : images) {
     s->images[name] = nvgCreateImage(s->vg, file, 1);

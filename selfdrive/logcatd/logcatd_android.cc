@@ -25,6 +25,8 @@ typedef struct LiveNaviDataResult {
       //int  mapEnable;    // bool;
       long  tv_sec;
       long  tv_nsec;
+      int roadLimitSpeed = 0;  // int;
+      std::string roadName = "";
 
       int waze_AlertId = 0;
       int waze_AlertDistance = 0;
@@ -33,6 +35,7 @@ typedef struct LiveNaviDataResult {
       int waze_NavSign = 0;
       int waze_NavDistance = 0;
       int waze_CurrentSpeed = 0;
+      std::string waze_AlertType = "";
 
       std::string opkr_0 = "";
       std::string opkr_1 = "";
@@ -136,6 +139,7 @@ int main() {
       }
       else if (naviSel == 3) {
         if( strcmp( entry.tag, "opkrwazereportid" ) == 0 ) {
+          res.waze_AlertType = entry.message;
           std::string opkr_log_msg = entry.message;
           std::size_t found1=opkr_log_msg.find("icon_report_speedlimit");
           std::size_t found2=opkr_log_msg.find("icon_report_camera");
@@ -188,6 +192,7 @@ int main() {
           res.tv_sec = entry.tv_sec;
           res.tv_nsec = tv_nsec;
           res.waze_AlertId = 0;
+          res.waze_AlertType = "";
           res.waze_AlertDistance = 0;
         }
       }
@@ -213,6 +218,14 @@ int main() {
       else if( strcmp( entry.tag, "opkrroadsigntype" ) == 0 )
       {
         res.safetySign = atoi( entry.message );
+      }
+      else if( strcmp( entry.tag, "opkrroadlimitspd" ) == 0 )
+      {
+        res.roadLimitSpeed = atoi( entry.message );
+      }
+      else if( strcmp( entry.tag, "opkrroadname" ) == 0 )
+      {
+        res.roadName = entry.message;
       }
       else if( naviSel == 1 && (res.safetyDistance > 1 && res.safetyDistance < 60) && (strcmp( entry.tag, "AudioFlinger" ) == 0) )  //   msm8974_platform
       {
@@ -272,6 +285,8 @@ int main() {
       // framed.setRoadCurvature( res.roadCurvature ); // road_curvature Float32;
       framed.setTurnInfo( res.turnInfo );  // int;
       framed.setDistanceToTurn( res.distanceToTurn );  // Float32;
+      framed.setRoadLimitSpeed( res.roadLimitSpeed );  // int;
+      framed.setRoadName( res.roadName );  // str;
       framed.setTs( res.tv_sec );
       //framed.setMapEnable( res.mapEnable );
       //framed.setMapValid( res.mapValid );
@@ -291,6 +306,7 @@ int main() {
       if (naviSel == 3) {
         framed.setWazeAlertId( res.waze_AlertId );
         framed.setWazeAlertDistance( res.waze_AlertDistance );
+        framed.setWazeAlertType( res.waze_AlertType );
         if (is_metric) {
           framed.setWazeRoadSpeedLimit( res.waze_RoadSpeedLimit );
         } else {

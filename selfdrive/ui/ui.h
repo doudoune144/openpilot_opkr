@@ -199,6 +199,7 @@ typedef struct UIScene {
   int mapSignCam;
   float vSetDis;
   bool cruiseAccStatus;
+  bool driverAcc;
   int laneless_mode;
   int recording_count;
   int recording_quality;
@@ -241,7 +242,7 @@ typedef struct UIScene {
   bool tmux_error_check = false;
   bool speedlimit_signtype;
   bool sl_decel_off;
-  bool osm_off_spdlimit;
+  bool pause_spdlimit;
   float a_req_value;
   bool osm_enabled;
   int radar_long_helper;
@@ -292,6 +293,9 @@ typedef struct UIScene {
   float light_sensor, accel_sensor, gyro_sensor;
   bool started, ignition, is_metric, longitudinal_control, end_to_end;
   uint64_t started_frame;
+
+  uint64_t waze_stop_frame;
+  bool waze_stop = false;
 
   float accel_prob[2];
 
@@ -344,6 +348,7 @@ typedef struct UIScene {
     std::string wazeroadname;
     int wazenavsign;
     int wazenavdistance;
+    std::string wazealerttype;
   } liveNaviData;
 
   struct _LiveENaviData
@@ -358,7 +363,7 @@ typedef struct UIScene {
     int eopkrlinklength;
     int eopkrcurrentlinkangle;
     int eopkrnextlinkangle;
-    std::string eopkrposroadname;
+    std::string eopkrroadname;
     bool eopkrishighway;
     bool eopkristunnel;
     std::string eopkr0;
@@ -378,6 +383,7 @@ typedef struct UIScene {
     std::string ewazeroadname;
     int ewazenavsign;
     int ewazenavdistance;
+    std::string ewazealerttype;
   } liveENaviData;
 
   struct _LiveMapData

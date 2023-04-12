@@ -596,7 +596,7 @@ struct ControlsState @0x97ff69c53601abf1 {
   mapSignCam @76 :Float32;
   dynamicTRMode @69 :UInt8;
   dynamicTRValue @70 :Float32;
-  osmOffSpdLimit @71 :Bool;
+  pauseSpdLimit @71 :Bool;
   accel @72 :Float32;
   safetySpeed @73 :Float32;
   steeringAngleDesiredDeg @74 :Float32;
@@ -1752,6 +1752,10 @@ struct LiveNaviData {
   turnInfo @5 :Int32;
   distanceToTurn @6 :Float32;
   ts @7 :UInt64;
+  roadName @28 :Text;
+  roadLimitSpeed @29 :Int32;
+  isHighway @30 :Bool;
+  isTunnel @31 :Bool;
 
   mapValid @8 :Bool;
   mapEnable @9 :Int32;
@@ -1774,6 +1778,7 @@ struct LiveNaviData {
   wazeNavSign @24 :Int64;
   wazeNavDistance @25 :Int32;
   wazeCurrentSpeed @26 :Int32;
+  wazeAlertType @27 :Text;
 }
 
 struct LiveENaviData {
@@ -1788,7 +1793,7 @@ struct LiveENaviData {
   linkLength @8 :Int32;
   currentLinkAngle @9 :Int32;
   nextLinkAngle @10 :Int32;
-  posRoadName @11 :Text;
+  roadName @11 :Text;
   isHighway @12 :Bool;
   isTunnel @13 :Bool;
   opkr0 @14 :Text;
@@ -1808,6 +1813,7 @@ struct LiveENaviData {
   wazeNavSign @28 :Int64;
   wazeNavDistance @29 :Int32;
   wazeCurrentSpeed @30 :Int32;
+  wazeAlertType @31 :Text;
 }
 
 struct LiveMapDataDEPRECATED {
